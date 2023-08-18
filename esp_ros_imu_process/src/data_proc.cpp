@@ -1,5 +1,5 @@
 #include "data_proc.h"
-#include "JY901.h"
+ 
 #define measeureF 0
 xSemaphoreHandle xSemaphore_data_send = NULL;
 
@@ -8,9 +8,9 @@ typedef struct
 {
     uint8_t head, type;
     uint32_t time;
-    float ax,ay,az;
-    float gx,gy,gz;
-    float q0,q1,q2,q3;
+    float ax, ay, az;
+    float gx, gy, gz;
+    float q0, q1, q2, q3;
     uint32_t state_flags;
     uint32_t check;
 } robot_state_data_t;
@@ -26,11 +26,15 @@ uint32_t check_sum(uint8_t *data, uint8_t len)
     }
     return sum;
 }
-void data_proc_cb(AsyncUDPPacket *packet)
+void data_proc_cb(AsyncUDPPacket *packet)//接收数据的回调 
 {
-    if (packet->length() > 0)
+    // Serial.printf("data_proc_cb:%d,expect:%d\n", packet->length(), robot_data_size);
+    if (packet->length() == robot_data_size)
     {
-         
+        xSemaphoreTake(xSemaphore_data_send, portMAX_DELAY);
+        memcpy(&robot_state_data, packet->data(), robot_data_size);
+        xSemaphoreGive(xSemaphore_data_send);
+        // Serial.printf("Q0:%.2f,Q1:%.2f,Q2:%.2f,Q3:%.2f\n", robot_state_data.q0, robot_state_data.q1, robot_state_data.q2, robot_state_data.q3);
     }
 }
 
@@ -48,7 +52,7 @@ void task_data_proc(void *pvParameter)
         if (node == NULL)
         {
 
-            node = udp.get_node("process_node");
+            node = udp.get_node("imu_node");
             if (node != NULL)
             {
                 Serial.println("[udpnode] node found");
@@ -60,6 +64,7 @@ void task_data_proc(void *pvParameter)
             else
             {
                 Serial.println("[udpnode]node not found");
+                udp.print_node_list();
             }
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
@@ -72,19 +77,11 @@ void task_data_proc(void *pvParameter)
         }
         else if (node != NULL && node->inited == 1)
         {
-            xSemaphoreTake(xSemaphore_data_send, portMAX_DELAY);
-            robot_state_data.head = 0x55;
-            robot_state_data.type = 0x01;
-            robot_state_data.ax=imu.accx;
-            robot_state_data.ay=imu.accy;
-            robot_state_data.az=imu.accz;
-            robot_state_data.gx=imu.gyrox;
-            robot_state_data.gy=imu.gyroy;
-            robot_state_data.gz=imu.gyroz;
-            imu.getQ(&robot_state_data.q0,&robot_state_data.q1,&robot_state_data.q2,&robot_state_data.q3);
-            robot_state_data.state_flags = 0;
-            robot_state_data.check = check_sum((uint8_t *)&robot_state_data, robot_data_size - 4);
-            node->send_data((uint8_t *)&robot_state_data, robot_data_size);
+            //在此处发送数据,目前没有数据要发 ////////////
+
+
+
+            ///////////////////////////
 #if measeureF
             if (millis() - last_time > 1000)
             {
@@ -96,9 +93,7 @@ void task_data_proc(void *pvParameter)
             }
             tick++;
 #endif
-            xSemaphoreGive(xSemaphore_data_send);
-            // node->send_data(data_str);
-            // vTaskDelay(5 / portTICK_PERIOD_MS);
+        
         }
     }
 }

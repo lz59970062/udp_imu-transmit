@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "config.h"
 #include "comunicate.h"
-#include "JY901.h"
+ 
 void task_data_proc(void *pvParameter);
 void tata_proc_init();
 
