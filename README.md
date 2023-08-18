@@ -6,7 +6,7 @@
 这个项目是我的ros集合下的一个小项目，验证功能用，可以作为简单的数据读取传输框架修改。
 
 # 文件介绍
-
+```
 │  README.md
 │  ros_imu.zip
 ├─esp_ros_imu_process
@@ -64,7 +64,7 @@
     │      
     └─test
             README
-            
+```
 
 ### esp_ros_imu: 
 
@@ -75,3 +75,10 @@ src文件是项目代码所在，数据的读写逻辑在data_proc.cpp中。
 ### esp_ros_imu_process: 
 
 运行在另一块esp32板子上的工程，可以进行数据接收，处理，转发
+
+### 环境配置
+
+本项目使用 PlatformIO。如果在设置环境时遇到问题，请尝试使用此软件包，其中包含了完整的 ESP32 工具链和软件包。您可以从以下链接下载：https://pan.baidu.com/s/1tAoVEFcYVSH87ARoisvW-w （密码：t91w）
+
+使用时，先把该文件夹解压到用户目录的根目录，然后再安装platformio插件
+![Alt text](image.png)
